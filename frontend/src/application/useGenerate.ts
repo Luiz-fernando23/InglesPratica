@@ -22,6 +22,7 @@ export function useGenerate() {
         count: opts?.count ?? 10,
         allow_repeat: opts?.allow_repeat ?? false,
         exclude,
+        level: opts?.level || undefined,
       }
       const res = kind === 'phrases' ? await generationApi.phrases(payload) : await generationApi.words(payload)
       setData(res)

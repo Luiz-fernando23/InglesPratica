@@ -11,6 +11,7 @@ class GenerateRequest(BaseModel):
     count: int = Field(default=10, ge=1, le=25)
     allow_repeat: bool = False
     exclude: list[str] | None = None
+    level: str | None = Field(default=None, pattern="^(basic|intermediate|advanced)$")
 
 class GenerationBatchResponse(BaseModel):
     id: str

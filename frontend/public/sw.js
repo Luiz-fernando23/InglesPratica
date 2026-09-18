@@ -1,4 +1,4 @@
-const CACHE = 'ingles-na-mao-v1'
+const CACHE = 'ingles-na-mao-v2'
 const CORE = ['/', '/manifest.webmanifest', '/icon-192.svg', '/icon-512.svg']
 
 self.addEventListener('install', (e) => {
@@ -27,4 +27,31 @@ self.addEventListener('fetch', (e) => {
       return res
     }).catch(() => caches.match('/')))
   )
+})
+
+self.addEventListener('push', (e) => {
+  let data = { title: 'Inglês na Mão 📚', body: 'Hora de praticar!', url: '/' }
+  try {
+    if (e.data) data = Object.assign(data, e.data.json())
+  } catch (_) { /* ignora */ }
+  // @ts-ignore
+  e.waitUntil(self.registration.showNotification(data.title, {
+    body: data.body,
+    icon: '/icon-192.svg',
+    badge: '/icon-192.svg',
+    data: { url: data.url || '/' },
+  }))
+})
+
+self.addEventListener('notificationclick', (e) => {
+  e.notification.close()
+  const url = (e.notification.data && e.notification.data.url) || '/'
+  // @ts-ignore
+  e.waitUntil(self.clients.matchAll({ type: 'window' }).then((clients) => {
+    for (const c of clients) {
+      if ('focus' in c) { c.focus(); return }
+    }
+    // @ts-ignore
+    if (self.clients.openWindow) return self.clients.openWindow(url)
+  }))
 })

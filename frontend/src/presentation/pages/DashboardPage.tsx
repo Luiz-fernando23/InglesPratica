@@ -5,6 +5,7 @@ import { ItemCard } from '../components/ItemCard'
 import { ThemeToggle } from '../components/ThemeToggle'
 import { DailyCard, StatsCards } from '../components/ProgressCards'
 import { ReminderCard } from '../components/ReminderCard'
+import { PushCard } from '../components/PushCard'
 import { OfflineBanner } from '../../application/useOnline'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
@@ -16,11 +17,12 @@ export function DashboardPage() {
   const [count, setCount] = useState(10)
   const [allowRepeat, setAllowRepeat] = useState(false)
   const [excludeRaw, setExcludeRaw] = useState('')
+  const [level, setLevel] = useState('')
 
   useEffect(() => { load() }, [load])
   useEffect(() => { if (data) load() }, [data]) // eslint-disable-line
 
-  const opts = { count, allow_repeat: allowRepeat, excludeRaw }
+  const opts = { count, allow_repeat: allowRepeat, excludeRaw, level: level || undefined }
 
   const cardStyle: React.CSSProperties = {
     background: 'var(--bg-card)',
@@ -58,6 +60,7 @@ export function DashboardPage() {
         <DailyCard daily={daily} />
         <StatsCards stats={stats} />
         <ReminderCard />
+        <PushCard />
 
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           <Link to="/study" style={navBtn('/study', '📖')}>📖 Flashcards</Link>
@@ -87,6 +90,15 @@ export function DashboardPage() {
                   style={{ width: 18, height: 18 }}
                 />
                 Permitir repetição
+              </label>
+              <label style={{ flex: '1 1 160px', fontSize: 14, fontWeight: 600 }}>
+                Nível
+                <select value={level} onChange={e => setLevel(e.target.value)} style={{ ...inputStyle, marginTop: 6 }}>
+                  <option value="">Todos</option>
+                  <option value="basic">Básico</option>
+                  <option value="intermediate">Intermediário</option>
+                  <option value="advanced">Avançado</option>
+                </select>
               </label>
             </div>
 

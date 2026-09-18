@@ -31,12 +31,24 @@ class SqlAlchemyGenerationRepository(IGenerationRepository):
         model = res.scalar_one()
         return _to_batch(model)
 
-    async def list_batches(self, user_id: UUID, batch_type: Optional[str], limit: int, offset: int) -> tuple[list[GenerationBatch], int]:
+    async def list_batches(self, user_id: UUID, batch_type: Optional[str], limit: int, offset: int, q: Optional[str] = None) -> tuple[list[GenerationBatch], int]:
         base_q = select(GenerationBatchModel).where(GenerationBatchModel.user_id == str(user_id))
         count_q = select(func.count()).select_from(GenerationBatchModel).where(GenerationBatchModel.user_id == str(user_id))
         if batch_type:
             base_q = base_q.where(GenerationBatchModel.type == batch_type)
             count_q = count_q.where(GenerationBatchModel.type == batch_type)
+        if q and q.strip():
+            like = f"%{q.strip()}%"
+            match = (
+                select(GeneratedItemModel.id)
+                .where(
+                    GeneratedItemModel.batch_id == GenerationBatchModel.id,
+                    (GeneratedItemModel.content_en.ilike(like) | GeneratedItemModel.content_pt.ilike(like)),
+                )
+                .exists()
+            )
+            base_q = base_q.where(match)
+            count_q = count_q.where(match)
         total = (await self.db.execute(count_q)).scalar_one()
         base_q = base_q.options(selectinload(GenerationBatchModel.items)).order_by(GenerationBatchModel.created_at.desc()).limit(limit).offset(offset)
         res = await self.db.execute(base_q)

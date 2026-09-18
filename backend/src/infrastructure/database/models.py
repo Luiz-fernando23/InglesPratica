@@ -51,3 +51,14 @@ class FavoriteModel(Base):
     __table_args__ = (
         Index("ix_fav_user_content", "user_id", "content_en", unique=True),
     )
+
+class PushSubscriptionModel(Base):
+    __tablename__ = "push_subscriptions"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=gen_uuid)
+    user_id: Mapped[str] = mapped_column(String(36), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    endpoint: Mapped[str] = mapped_column(String(2000), nullable=False, unique=True)
+    p256dh: Mapped[str] = mapped_column(String(500), nullable=False)
+    auth: Mapped[str] = mapped_column(String(500), nullable=False)
+    remind_time: Mapped[str] = mapped_column(String(5), nullable=False, default="08:00")  # HH:MM
+    last_sent: Mapped[str | None] = mapped_column(String(10), nullable=True)  # YYYY-MM-DD
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)

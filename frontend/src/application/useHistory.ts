@@ -7,7 +7,7 @@ export function useHistory() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const fetch = useCallback(async (params: { page?: number; page_size?: number; type?: string } = {}) => {
+  const fetch = useCallback(async (params: { page?: number; page_size?: number; type?: string; q?: string } = {}) => {
     setLoading(true); setError(null)
     try {
       const res = await historyApi.list(params)

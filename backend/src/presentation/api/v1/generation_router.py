@@ -31,7 +31,7 @@ async def generate_phrases(
     repo = SqlAlchemyGenerationRepository(db)
     uc = GeneratePhrasesUseCase(repo)
     opts = body or GenerateRequest()
-    batch, exhausted = await uc.execute(user.id, count=opts.count, allow_repeat=opts.allow_repeat, exclude=opts.exclude)
+    batch, exhausted = await uc.execute(user.id, count=opts.count, allow_repeat=opts.allow_repeat, exclude=opts.exclude, level=opts.level)
     return _to_response(batch, exhausted)
 
 @router.post("/words", response_model=GenerationBatchResponse)
@@ -43,5 +43,5 @@ async def generate_words(
     repo = SqlAlchemyGenerationRepository(db)
     uc = GenerateWordsUseCase(repo)
     opts = body or GenerateRequest()
-    batch, exhausted = await uc.execute(user.id, count=opts.count, allow_repeat=opts.allow_repeat, exclude=opts.exclude)
+    batch, exhausted = await uc.execute(user.id, count=opts.count, allow_repeat=opts.allow_repeat, exclude=opts.exclude, level=opts.level)
     return _to_response(batch, exhausted)

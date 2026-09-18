@@ -12,6 +12,9 @@ class Settings(BaseSettings):
     jwt_access_token_expire_minutes: int = 30
     jwt_refresh_token_expire_minutes: int = 1440
     cors_origins: str = "http://localhost:5173,http://localhost:3000"
+    vapid_private_key: str = ""
+    vapid_public_key: str = ""
+    vapid_subject: str = "mailto:voce@exemplo.com"
 
     @property
     def cors_origins_list(self) -> list[str]:

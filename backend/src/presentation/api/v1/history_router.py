@@ -15,12 +15,13 @@ async def list_history(
     page: int = Query(1, ge=1),
     page_size: int = Query(10, ge=1, le=50),
     type: str | None = Query(None, pattern="^(phrase|word)$"),
+    q: str | None = Query(None, max_length=100),
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
     repo = SqlAlchemyGenerationRepository(db)
     uc = GetHistoryUseCase(repo)
-    batches, total = await uc.execute(user.id, type, page, page_size)
+    batches, total = await uc.execute(user.id, type, page, page_size, q)
     items = [
         GenerationBatchResponse(
             id=str(b.id),

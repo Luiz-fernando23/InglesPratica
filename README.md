@@ -99,9 +99,9 @@ Base: `/api/v1`
 | POST | `/auth/register` | — | `{name, email, password}` | `{access_token, refresh_token}` |
 | POST | `/auth/login` | — | `{email, password}` | `{access_token, refresh_token}` |
 | POST | `/auth/refresh` | — | `{refresh_token}` | `{access_token, refresh_token}` |
-| POST | `/generation/phrases` | Bearer | `{count=10 (1-25), allow_repeat=false, exclude=[]}` | `{id, type, created_at, items[], exhausted}` |
-| POST | `/generation/words` | Bearer | `{count=10 (1-25), allow_repeat=false, exclude=[]}` | `{id, type, created_at, items[], exhausted}` |
-| GET | `/history?page=1&page_size=10&type=phrase\|word` | Bearer | query | `{total, page, page_size, items[]}` |
+| POST | `/generation/phrases` | Bearer | `{count=10 (1-25), allow_repeat=false, exclude=[], level=basic\|intermediate\|advanced}` | `{id, type, created_at, items[], exhausted}` |
+| POST | `/generation/words` | Bearer | `{count=10 (1-25), allow_repeat=false, exclude=[], level=...}` | `{id, type, created_at, items[], exhausted}` |
+| GET | `/history?page=1&page_size=10&type=phrase\|word&q=busca` | Bearer | query (`q` busca em EN+PT) | `{total, page, page_size, items[]}` |
 | GET | `/history/{batch_id}` | Bearer | — | lote detalhado |
 | POST | `/favorites` | Bearer | `{content_en, content_pt, kind}` | favorito (409 se duplo) |
 | POST | `/favorites/bulk` | Bearer | `{items: [{content_en, content_pt, kind}]}` (máx 200) | `{added, skipped, items}` |
@@ -109,6 +109,10 @@ Base: `/api/v1`
 | DELETE | `/favorites/{id}` ou `/favorites/by-content?content_en=...` | Bearer | — | 204 |
 | GET | `/progress/daily` | Bearer | — | palavra + frase do dia |
 | GET | `/progress/stats` | Bearer | — | totais, streak, últimos 7 dias |
+| GET | `/push/vapid-key` | — | — | chave pública VAPID |
+| POST | `/push/subscribe` | Bearer | `{endpoint, keys:{p256dh,auth}, remind_time:"08:00"}` | inscreve aparelho |
+| DELETE | `/push/subscribe?endpoint=...` | Bearer | query | 204 |
+| POST | `/push/test` | Bearer | — | envia push de teste aos seus aparelhos |
 
 **Anti-repetição:** com `allow_repeat=false` (padrão), o backend exclui `content_en` que o usuário já gerou. Se o estoque novo acabar, retorna `exhausted: true` com o que restou — ou `409` se não sobrar nada.
 
@@ -145,7 +149,12 @@ DATABASE_URL=postgresql+asyncpg://postgres:postgres@db:5432/ingles
 JWT_SECRET_KEY=troque-por-uma-chave-forte-de-32+-chars
 JWT_ALGORITHM=HS256
 CORS_ORIGINS=http://localhost:5173,http://localhost:3000
+VAPID_PRIVATE_KEY=gerada-com-ecdsa-NIST256p-urlsafe-b64-sem-padding
+VAPID_PUBLIC_KEY=correspondente-a-privada
+VAPID_SUBJECT=mailto:voce@exemplo.com
 ```
+
+> Sem `VAPID_PRIVATE_KEY`, o agendador de push fica desativado e `GET /push/vapid-key` retorna `enabled: false`. Para testar push no celular: instale o PWA (Chrome → "Adicionar à tela inicial"), ative o push no Dashboard e use "Enviar teste". O backend verifica a cada 60s as inscrições com horário vencido e envia o lembrete (com o app fechado).
 
 ## 📝 Notas de decisão
 

@@ -8,8 +8,15 @@ export function HistoryPage() {
   const { data, loading, fetch } = useHistory()
   const [filter, setFilter] = useState<string>('')
   const [page, setPage] = useState(1)
+  const [search, setSearch] = useState('')
+  const [debounced, setDebounced] = useState('')
 
-  useEffect(() => { fetch({ page, page_size: 10, type: filter || undefined }) }, [page, filter, fetch])
+  useEffect(() => {
+    const id = setTimeout(() => { setDebounced(search.trim()); setPage(1) }, 400)
+    return () => clearTimeout(id)
+  }, [search])
+
+  useEffect(() => { fetch({ page, page_size: 10, type: filter || undefined, q: debounced || undefined }) }, [page, filter, debounced, fetch])
 
   const filterBtn = (active: boolean): React.CSSProperties => ({
     padding: '8px 12px',
@@ -28,6 +35,8 @@ export function HistoryPage() {
         <ThemeToggle />
       </header>
       <main style={{ maxWidth: 720, margin: '0 auto', padding: 24 }}>
+        <input placeholder="🔎 Buscar no histórico (inglês ou português)..." value={search} onChange={e => setSearch(e.target.value)}
+          style={{ width: '100%', padding: 10, borderRadius: 8, border: '1px solid var(--input-border)', background: 'var(--input-bg)', color: 'var(--text)', marginBottom: 12 }} />
         <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
           <button onClick={() => { setFilter(''); setPage(1) }} style={filterBtn(filter === '')}>Todos</button>
           <button onClick={() => { setFilter('phrase'); setPage(1) }} style={filterBtn(filter === 'phrase')}>Frases</button>

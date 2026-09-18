@@ -71,12 +71,49 @@ def _matches_exclude(content_en: str, exclude: list[str]) -> bool:
     return any(w and w.lower() in low for w in exclude)
 
 
+INTERMEDIATE_WORDS = {"journey", "knowledge", "freedom", "challenge", "quickly", "opportunity", "healthy", "understand"}
+ADVANCED_WORDS = {"wisdom", "strength"}
+
+INTERMEDIATE_PHRASES = {
+    "she has been studying english for two years.",
+    "we should meet tomorrow at the park.",
+    "the book on the table belongs to my brother.",
+    "they traveled to new york last summer.",
+    "i have never seen such a beautiful sunset.",
+    "we are planning a trip to the beach.",
+    "the movie was more interesting than i expected.",
+    "learning a new language takes time and dedication.",
+    "the children are playing in the garden.",
+    "i need to buy some groceries for the week.",
+    "he explained the problem very clearly.",
+    "we had dinner at a nice restaurant yesterday.",
+    "she is looking for a new job opportunity.",
+}
+
+
+def level_of_word(content_en: str) -> str:
+    w = _normalize(content_en)
+    if w in ADVANCED_WORDS:
+        return "advanced"
+    if w in INTERMEDIATE_WORDS:
+        return "intermediate"
+    return "basic"
+
+
+def level_of_phrase(content_en: str) -> str:
+    if _normalize(content_en) in INTERMEDIATE_PHRASES:
+        return "intermediate"
+    return "basic"
+
+
 def _pick(
     pool: list[tuple[str, str]],
     count: int,
     allow_repeat: bool,
     exclude: list[str],
     seen: set[str],
+    levels: set[str] | None = None,
+    level_fn=None,
 ) -> tuple[list[tuple[str, str]], bool]:
     """Filtra pool por exclude + seen (se allow_repeat=False) e sorteia.
 
@@ -85,11 +122,13 @@ def _pick(
     """
     exclude_clean = [w.strip() for w in (exclude or []) if w and w.strip()]
     seen_norm = {_normalize(s) for s in (seen or set())}
+    levels = levels or set()
 
     candidates = [
         p for p in pool
         if not _matches_exclude(p[0], exclude_clean)
         and (allow_repeat or _normalize(p[0]) not in seen_norm)
+        and (not levels or (level_fn(p[0]) if level_fn else "basic") in levels)
     ]
     if len(candidates) >= count:
         return random.sample(candidates, k=count), False
@@ -103,13 +142,15 @@ def generate_phrases(
     allow_repeat: bool = False,
     exclude: list[str] | None = None,
     seen: set[str] | None = None,
+    levels: set[str] | None = None,
 ) -> tuple[list[tuple[str, str]], bool]:
-    return _pick(PHRASES, count, allow_repeat, exclude or [], seen or set())
+    return _pick(PHRASES, count, allow_repeat, exclude or [], seen or set(), levels, level_of_phrase)
 
 def generate_words(
     count: int = 10,
     allow_repeat: bool = False,
     exclude: list[str] | None = None,
     seen: set[str] | None = None,
+    levels: set[str] | None = None,
 ) -> tuple[list[tuple[str, str]], bool]:
-    return _pick(WORDS, count, allow_repeat, exclude or [], seen or set())
+    return _pick(WORDS, count, allow_repeat, exclude or [], seen or set(), levels, level_of_word)

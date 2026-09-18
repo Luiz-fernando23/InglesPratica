@@ -12,16 +12,18 @@ export const generationApi = {
     count: opts?.count ?? 10,
     allow_repeat: opts?.allow_repeat ?? false,
     exclude: opts?.exclude ?? [],
+    level: opts?.level ?? null,
   }).then(r => r.data),
   words: (opts?: GenerateOptions): Promise<GenerationBatch> => api.post('/generation/words', {
     count: opts?.count ?? 10,
     allow_repeat: opts?.allow_repeat ?? false,
     exclude: opts?.exclude ?? [],
+    level: opts?.level ?? null,
   }).then(r => r.data),
 }
 
 export const historyApi = {
-  list: (params: { page?: number; page_size?: number; type?: string }): Promise<PaginatedHistory> => api.get('/history', { params }).then(r => r.data),
+  list: (params: { page?: number; page_size?: number; type?: string; q?: string }): Promise<PaginatedHistory> => api.get('/history', { params }).then(r => r.data),
   detail: (id: string): Promise<GenerationBatch> => api.get(`/history/${id}`).then(r => r.data),
 }
 
@@ -36,4 +38,11 @@ export const favoritesApi = {
 export const progressApi = {
   stats: (): Promise<Stats> => api.get('/progress/stats').then(r => r.data),
   daily: (): Promise<Daily> => api.get('/progress/daily').then(r => r.data),
+}
+
+export const pushApi = {
+  vapidKey: (): Promise<{ public_key: string; enabled: boolean }> => api.get('/push/vapid-key').then(r => r.data),
+  subscribe: (endpoint: string, keys: { p256dh: string; auth: string }, remind_time: string) => api.post('/push/subscribe', { endpoint, keys, remind_time }).then(r => r.data),
+  unsubscribe: (endpoint: string) => api.delete('/push/subscribe', { params: { endpoint } }).then(r => r.data),
+  test: (): Promise<{ devices: number; results: string[] }> => api.post('/push/test').then(r => r.data),
 }
