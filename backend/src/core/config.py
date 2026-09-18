@@ -15,9 +15,20 @@ class Settings(BaseSettings):
     vapid_private_key: str = ""
     vapid_public_key: str = ""
     vapid_subject: str = "mailto:voce@exemplo.com"
+    static_dir: str = "/app/static"  # onde o Dockerfile.prod coloca o build do frontend
 
     @property
     def cors_origins_list(self) -> list[str]:
         return [o.strip() for o in self.cors_origins.split(",") if o.strip()]
+
+    @property
+    def database_url_async(self) -> str:
+        """Normaliza URLs de provedores (postgres://) para o driver asyncpg."""
+        url = self.database_url
+        if url.startswith("postgres://"):
+            url = "postgresql+asyncpg://" + url[len("postgres://"):]
+        elif url.startswith("postgresql://"):
+            url = "postgresql+asyncpg://" + url[len("postgresql://"):]
+        return url
 
 settings = Settings()

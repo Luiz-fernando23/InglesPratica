@@ -127,6 +127,25 @@ curl -X POST http://localhost:8000/api/v1/generation/phrases \
   -d '{"count": 5, "allow_repeat": false, "exclude": ["book"]}'
 ```
 
+## ☁️ Deploy (Render, grátis, com HTTPS)
+
+O repo já vem pronto para subir como **serviço único** (FastAPI serve a API + o app) via `render.yaml` + `backend/Dockerfile.prod`.
+
+1. Crie conta em https://render.com e conecte seu GitHub
+2. **New → Blueprint** → selecione `Luiz-fernando23/InglesPratica` → **Apply**
+   - Sobe `ingles-na-mao` (web) + `ingles-db` (Postgres)
+3. Gere chaves VAPID de produção e preencha nas env vars do serviço:
+   ```bash
+   cd backend && python scripts/gen_vapid.py
+   ```
+   - `VAPID_PRIVATE_KEY`, `VAPID_PUBLIC_KEY` + ajuste `VAPID_SUBJECT` para seu e-mail
+   - Salve → o Render faz redeploy sozinho
+4. Acesse `https://ingles-na-mao.onrender.com` (nome pode variar):
+   - App em `/`, API em `/api/v1`, docs em `/docs`, health em `/health`
+5. No celular: abra a URL no Chrome → "Adicionar à tela inicial" → ative o push no Dashboard → "Enviar teste"
+
+> Notas: no plano free o serviço **dorme sem tráfego** (primeira requisição demora ~1 min e o lembrete pode atrasar). Para lembretes pontuais, use plano pago (sempre ligado). As tabelas são criadas sozinhas no boot; `DATABASE_URL` com `postgres://` é normalizada para asyncpg automaticamente.
+
 ## 🧪 Testes
 
 ```bash

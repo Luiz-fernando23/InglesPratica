@@ -47,6 +47,35 @@ app.include_router(push_router, prefix="/api/v1")
 async def health():
     return {"status": "ok"}
 
-@app.get("/")
-async def root():
-    return {"message": "Inglês na Mão API - see /docs"}
+# ── Single-service prod: serve o build do frontend (quando existir) ──
+# Em dev local a pasta não existe e a API segue pura (frontend roda no Vite).
+import os as _os
+from fastapi.responses import FileResponse as _FileResponse
+from fastapi.staticfiles import StaticFiles as _StaticFiles
+
+_static = settings.static_dir
+_index = _os.path.join(_static, "index.html")
+if _os.path.isfile(_index):
+    _assets = _os.path.join(_static, "assets")
+    if _os.path.isdir(_assets):
+        app.mount("/assets", _StaticFiles(directory=_assets), name="assets")
+
+    @app.get("/", include_in_schema=False)
+    async def spa_root():
+        return _FileResponse(_index)
+
+    @app.get("/{path:path}", include_in_schema=False)
+    async def spa_fallback(path: str):
+        # API, docs e arquivos com extensão passam direto (404 normal)
+        if path.startswith("api/") or path in ("docs", "openapi.json", "health"):
+            from fastapi import HTTPException as _HTTP
+            raise _HTTP(status_code=404)
+        candidate = _os.path.join(_static, path)
+        if "." in path.rsplit("/", 1)[-1] and _os.path.isfile(candidate):
+            return _FileResponse(candidate)
+        return _FileResponse(_index)
+else:
+
+    @app.get("/")
+    async def root():
+        return {"message": "Inglês na Mão API - see /docs"}

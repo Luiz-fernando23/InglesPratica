@@ -1,0 +1,24 @@
+# Produção single-service: builda o frontend e serve tudo pelo FastAPI.
+# Contexto: raiz do repo. Uso: Render (render.yaml) ou `docker build -f backend/Dockerfile.prod .`
+ARG VITE_API_URL=/api/v1
+
+FROM node:20-alpine AS web
+WORKDIR /web
+COPY frontend/package.json ./
+RUN npm install
+COPY frontend/ ./
+ARG VITE_API_URL
+ENV VITE_API_URL=$VITE_API_URL
+RUN npm run build
+
+FROM python:3.11-slim
+WORKDIR /app
+COPY backend/pyproject.toml ./
+RUN pip install --no-cache-dir -e .
+COPY backend/src ./src
+COPY backend/alembic ./alembic
+COPY backend/alembic.ini ./
+COPY --from=web /web/dist /app/static
+ENV PYTHONPATH=/app/src
+EXPOSE 8000
+CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000}"]
