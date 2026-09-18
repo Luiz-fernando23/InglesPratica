@@ -38,3 +38,16 @@ class GeneratedItemModel(Base):
     content_pt: Mapped[str] = mapped_column(String(1000), nullable=False)
     order_index: Mapped[int] = mapped_column(Integer, nullable=False)
     batch: Mapped[GenerationBatchModel] = relationship("GenerationBatchModel", back_populates="items")
+
+class FavoriteModel(Base):
+    __tablename__ = "favorites"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=gen_uuid)
+    user_id: Mapped[str] = mapped_column(String(36), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    content_en: Mapped[str] = mapped_column(String(1000), nullable=False)
+    content_pt: Mapped[str] = mapped_column(String(1000), nullable=False)
+    kind: Mapped[str] = mapped_column(String(20), nullable=False, default="word")  # word | phrase
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False, index=True)
+
+    __table_args__ = (
+        Index("ix_fav_user_content", "user_id", "content_en", unique=True),
+    )

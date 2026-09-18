@@ -7,6 +7,7 @@ from core.logging import setup_logging
 from presentation.api.v1.auth_router import router as auth_router
 from presentation.api.v1.generation_router import router as gen_router
 from presentation.api.v1.history_router import router as hist_router
+from presentation.api.v1.progress_router import fav_router, progress_router
 from infrastructure.database.base import engine
 from infrastructure.database.models import Base
 
@@ -33,6 +34,8 @@ app.add_middleware(
 app.include_router(auth_router, prefix="/api/v1")
 app.include_router(gen_router, prefix="/api/v1")
 app.include_router(hist_router, prefix="/api/v1")
+app.include_router(fav_router, prefix="/api/v1")
+app.include_router(progress_router, prefix="/api/v1")
 
 @app.get("/health")
 async def health():
