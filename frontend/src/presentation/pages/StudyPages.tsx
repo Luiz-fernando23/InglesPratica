@@ -1,8 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
 import { favoritesApi, historyApi } from '../../infrastructure/api/endpoints'
-import { ThemeToggle } from '../components/ThemeToggle'
 import { SpeakButton } from '../components/SpeakButton'
+import { AppLayout } from '../layouts/AppLayout'
 import type { GeneratedItem } from '../../domain/types'
 
 function shuffle<T>(arr: T[]): T[] {
@@ -50,14 +49,9 @@ export function StudyPage() {
   const knownCount = Object.values(known).filter(Boolean).length
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>
-      <header style={{ background: 'var(--bg-header)', borderBottom: '1px solid var(--border)', padding: '12px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Link to="/dashboard" style={{ textDecoration: 'none', color: 'var(--text)', fontWeight: 700 }}>← Voltar</Link>
-        <h1 style={{ margin: 0, fontSize: 18 }}>📖 Flashcards</h1>
-        <ThemeToggle />
-      </header>
-      <main style={{ maxWidth: 560, margin: '0 auto', padding: 24, textAlign: 'center' }}>
-        <p style={{ color: 'var(--text-muted)', fontSize: 13 }}>Baralho: {source} · {knownCount} marcadas como "sei" · toque no card para virar</p>
+    <AppLayout title="Flashcards">
+      <main style={{ display: 'grid', gap: 12, textAlign: 'center' }}>
+        <p style={{ color: 'var(--text-muted)', fontSize: 13, margin: 0 }}>Baralho: {source} · {knownCount} marcadas como “sei” · toque no card para virar</p>
         {!card && <p style={{ color: 'var(--text-muted)' }}>Gere frases/palavras ou favorite itens para montar seu baralho (mín. 4).</p>}
         {card && (
           <>
@@ -80,11 +74,11 @@ export function StudyPage() {
               <button onClick={() => mark(false)} style={{ flex: 1, padding: 14, borderRadius: 12, border: '1px solid var(--border)', background: 'var(--bg-card)', cursor: 'pointer', fontWeight: 700 }}>❌ Ainda não</button>
               <button onClick={() => mark(true)} style={{ flex: 1, padding: 14, borderRadius: 12, border: 0, background: '#16a34a', color: '#fff', cursor: 'pointer', fontWeight: 700 }}>✅ Sei!</button>
             </div>
-            <button onClick={() => { reshuffle(); setIdx(0); setFlipped(false) }} style={{ marginTop: 12, padding: '8px 14px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-card)', cursor: 'pointer' }}>🔀 Embaralhar</button>
+            <button onClick={() => { reshuffle(); setIdx(0); setFlipped(false) }} className="btn" style={{ marginTop: 12 }}>🔀 Embaralhar</button>
           </>
         )}
       </main>
-    </div>
+    </AppLayout>
   )
 }
 
@@ -109,14 +103,9 @@ export function QuizPage() {
   const next = () => { setPick(null); setQIdx(i => i + 1) }
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>
-      <header style={{ background: 'var(--bg-header)', borderBottom: '1px solid var(--border)', padding: '12px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Link to="/dashboard" style={{ textDecoration: 'none', color: 'var(--text)', fontWeight: 700 }}>← Voltar</Link>
-        <h1 style={{ margin: 0, fontSize: 18 }}>📝 Quiz · {score} pts</h1>
-        <ThemeToggle />
-      </header>
-      <main style={{ maxWidth: 560, margin: '0 auto', padding: 24 }}>
-        <p style={{ color: 'var(--text-muted)', fontSize: 13 }}>Fonte: {source} · questão {deck.length ? (qIdx % deck.length) + 1 : 0}</p>
+    <AppLayout title={`Quiz · ${score} pts`}>
+      <main style={{ display: 'grid', gap: 12 }}>
+        <p style={{ color: 'var(--text-muted)', fontSize: 13, margin: 0 }}>Fonte: {source} · questão {deck.length ? (qIdx % deck.length) + 1 : 0}</p>
         {!question && <p style={{ color: 'var(--text-muted)' }}>Você precisa de ao menos 4 itens (favoritos ou histórico) para o quiz.</p>}
         {question && (
           <>
@@ -140,13 +129,13 @@ export function QuizPage() {
             </div>
             {pick && (
               <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
-                <button onClick={next} style={{ flex: 1, padding: 14, borderRadius: 12, border: 0, background: '#4f46e5', color: '#fff', fontWeight: 700, cursor: 'pointer' }}>Próxima →</button>
-                <button onClick={() => { reshuffle(); setQIdx(0); setPick(null); setScore(0) }} style={{ padding: 14, borderRadius: 12, border: '1px solid var(--border)', background: 'var(--bg-card)', cursor: 'pointer' }}>🔀</button>
+                <button onClick={next} className="btn btn-primary" style={{ flex: 1 }}>Próxima →</button>
+                <button onClick={() => { reshuffle(); setQIdx(0); setPick(null); setScore(0) }} className="btn" aria-label="Embaralhar e recomeçar">🔀</button>
               </div>
             )}
           </>
         )}
       </main>
-    </div>
+    </AppLayout>
   )
 }

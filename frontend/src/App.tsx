@@ -5,6 +5,8 @@ import { ProtectedRoute } from './presentation/routes/ProtectedRoute'
 import { LoginPage } from './presentation/pages/LoginPage'
 import { RegisterPage } from './presentation/pages/RegisterPage'
 import { DashboardPage } from './presentation/pages/DashboardPage'
+import { PracticePage } from './presentation/pages/PracticePage'
+import { SettingsPage } from './presentation/pages/SettingsPage'
 import { HistoryPage } from './presentation/pages/HistoryPage'
 import { FavoritesPage } from './presentation/pages/FavoritesPage'
 import { StudyPage, QuizPage } from './presentation/pages/StudyPages'
@@ -18,6 +20,8 @@ export default function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+          <Route path="/practice" element={<ProtectedRoute><PracticePage /></ProtectedRoute>} />
+          <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
           <Route path="/history" element={<ProtectedRoute><HistoryPage /></ProtectedRoute>} />
           <Route path="/favorites" element={<ProtectedRoute><FavoritesPage /></ProtectedRoute>} />
           <Route path="/study" element={<ProtectedRoute><StudyPage /></ProtectedRoute>} />
