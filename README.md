@@ -8,6 +8,9 @@ App web para praticar inglês: gera **frases e palavras aleatórias com traduç�
 - 🎲 Geração aleatória **sem repetição** (por usuário)
 - 🔎 Filtros de geração: quantidade (1–25), `allow_repeat`, `exclude` (palavras banidas)
 - 📚 Histórico paginado com filtro por tipo (`phrase` / `word`)
+- ⭐ Favoritos + **importação de lista própria** (cole `house = casa`, até 200/lote)
+- 📖 Flashcards + 📝 Quiz (usam favoritos ou histórico)
+- 📴 Modo offline (PWA + cache + fila de sincronização) + ⏰ lembrete diário
 - 🌙 Tema dark / claro com persistência (`localStorage` + `prefers-color-scheme`)
 - 📱 Mobile-first responsivo
 
@@ -100,6 +103,12 @@ Base: `/api/v1`
 | POST | `/generation/words` | Bearer | `{count=10 (1-25), allow_repeat=false, exclude=[]}` | `{id, type, created_at, items[], exhausted}` |
 | GET | `/history?page=1&page_size=10&type=phrase\|word` | Bearer | query | `{total, page, page_size, items[]}` |
 | GET | `/history/{batch_id}` | Bearer | — | lote detalhado |
+| POST | `/favorites` | Bearer | `{content_en, content_pt, kind}` | favorito (409 se duplo) |
+| POST | `/favorites/bulk` | Bearer | `{items: [{content_en, content_pt, kind}]}` (máx 200) | `{added, skipped, items}` |
+| GET | `/favorites?kind=word\|phrase` | Bearer | query | `{total, items}` |
+| DELETE | `/favorites/{id}` ou `/favorites/by-content?content_en=...` | Bearer | — | 204 |
+| GET | `/progress/daily` | Bearer | — | palavra + frase do dia |
+| GET | `/progress/stats` | Bearer | — | totais, streak, últimos 7 dias |
 
 **Anti-repetição:** com `allow_repeat=false` (padrão), o backend exclui `content_en` que o usuário já gerou. Se o estoque novo acabar, retorna `exhausted: true` com o que restou — ou `409` se não sobrar nada.
 
