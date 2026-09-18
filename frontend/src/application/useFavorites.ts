@@ -3,7 +3,9 @@ import { favoritesApi } from '../infrastructure/api/endpoints'
 import type { Favorite } from '../domain/types'
 
 export function useFavorites() {
-  const [items, setItems] = useState<Favorite[]>([])
+  const [items, setItems] = useState<Favorite[]>(() => {
+    try { return JSON.parse(localStorage.getItem('favs-cache') || '[]') } catch { return [] }
+  })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -12,9 +14,11 @@ export function useFavorites() {
     try {
       const res = await favoritesApi.list(kind)
       setItems(res.items)
+      try { localStorage.setItem('favs-cache', JSON.stringify(res.items)) } catch { /* ignore */ }
     } catch (e: unknown) {
+      // offline: mantém cache já carregado no estado inicial
       // @ts-ignore
-      setError(e?.response?.data?.detail || 'Erro ao carregar favoritos')
+      setError(e?.response?.data?.detail || 'Sem conexão — mostrando salvos offline')
     } finally { setLoading(false) }
   }, [])
 

@@ -3,13 +3,20 @@ import { Link } from 'react-router-dom'
 import { useFavorites } from '../../application/useFavorites'
 import { ThemeToggle } from '../components/ThemeToggle'
 import { SpeakButton } from '../components/SpeakButton'
+import { ImportCard, syncOutbox } from '../components/ImportCard'
+import { OfflineBanner } from '../../application/useOnline'
 import { favoritesApi } from '../../infrastructure/api/endpoints'
 
 export function FavoritesPage() {
   const { items, loading, refresh } = useFavorites()
   const [filter, setFilter] = useState('')
+  const [synced, setSynced] = useState(0)
 
-  useEffect(() => { refresh() }, [refresh])
+  useEffect(() => {
+    refresh()
+    syncOutbox().then(n => { if (n) { setSynced(n); refresh() } })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const remove = async (id: string) => {
     await favoritesApi.remove(id)
@@ -22,16 +29,19 @@ export function FavoritesPage() {
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>
+      <OfflineBanner />
       <header style={{ background: 'var(--bg-header)', borderBottom: '1px solid var(--border)', padding: '12px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Link to="/dashboard" style={{ textDecoration: 'none', color: 'var(--text)', fontWeight: 700 }}>← Voltar</Link>
         <h1 style={{ margin: 0, fontSize: 18 }}>⭐ Favoritos ({items.length})</h1>
         <ThemeToggle />
       </header>
-      <main style={{ maxWidth: 720, margin: '0 auto', padding: 24 }}>
+      <main style={{ maxWidth: 720, margin: '0 auto', padding: 24, display: 'grid', gap: 16 }}>
+        {synced > 0 && <p style={{ fontSize: 13, background: 'var(--accent-bg)', color: 'var(--accent-text)', padding: '8px 12px', borderRadius: 8, margin: 0 }}>🔄 {synced} itens offline sincronizados!</p>}
+        <ImportCard onDone={refresh} />
         <input placeholder="Buscar em favoritos..." value={filter} onChange={e => setFilter(e.target.value)}
-          style={{ width: '100%', padding: 10, borderRadius: 8, border: '1px solid var(--input-border)', background: 'var(--input-bg)', color: 'var(--text)', marginBottom: 16 }} />
+          style={{ width: '100%', padding: 10, borderRadius: 8, border: '1px solid var(--input-border)', background: 'var(--input-bg)', color: 'var(--text)' }} />
         {loading && <p>Carregando...</p>}
-        {!loading && shown.length === 0 && <p style={{ color: 'var(--text-muted)' }}>Nenhum favorito ainda. Toque na ☆ dos cards para salvar e revisar aqui.</p>}
+        {!loading && shown.length === 0 && <p style={{ color: 'var(--text-muted)' }}>Nenhum favorito ainda. Toque na ☆ dos cards ou importe sua lista acima.</p>}
         <div style={{ display: 'grid', gap: 12 }}>
           {shown.map(f => (
             <div key={f.id} style={{ border: '1px solid var(--border)', borderRadius: 12, padding: 16, background: 'var(--bg-card)' }}>

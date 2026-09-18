@@ -4,6 +4,8 @@ import { useProgress } from '../../application/useProgress'
 import { ItemCard } from '../components/ItemCard'
 import { ThemeToggle } from '../components/ThemeToggle'
 import { DailyCard, StatsCards } from '../components/ProgressCards'
+import { ReminderCard } from '../components/ReminderCard'
+import { OfflineBanner } from '../../application/useOnline'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 
@@ -43,6 +45,7 @@ export function DashboardPage() {
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)', paddingBottom: 90 }}>
+      <OfflineBanner />
       <header style={{ background: 'var(--bg-header)', borderBottom: '1px solid var(--border)', padding: '12px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'sticky', top: 0, zIndex: 10 }}>
         <h1 style={{ margin: 0, fontSize: 20, fontWeight: 700 }}>Inglês na Mão</h1>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
@@ -54,6 +57,7 @@ export function DashboardPage() {
       <main style={{ maxWidth: 720, margin: '0 auto', padding: 16, display: 'grid', gap: 16 }}>
         <DailyCard daily={daily} />
         <StatsCards stats={stats} />
+        <ReminderCard />
 
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           <Link to="/study" style={navBtn('/study', '📖')}>📖 Flashcards</Link>

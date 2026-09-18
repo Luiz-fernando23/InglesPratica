@@ -17,6 +17,19 @@ class FavoritesListResponse(BaseModel):
     total: int
     items: list[FavoriteResponse]
 
+class BulkFavoriteItem(BaseModel):
+    content_en: str = Field(min_length=1, max_length=1000)
+    content_pt: str = Field(min_length=1, max_length=1000)
+    kind: str = Field(default="word", pattern="^(word|phrase)$")
+
+class BulkFavoriteRequest(BaseModel):
+    items: list[BulkFavoriteItem] = Field(min_length=1, max_length=200)
+
+class BulkFavoriteResponse(BaseModel):
+    added: int
+    skipped: int
+    items: list[FavoriteResponse]
+
 class DayCount(BaseModel):
     date: str
     batches: int

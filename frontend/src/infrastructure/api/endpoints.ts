@@ -28,6 +28,7 @@ export const historyApi = {
 export const favoritesApi = {
   list: (kind?: string): Promise<{ total: number; items: Favorite[] }> => api.get('/favorites', { params: kind ? { kind } : {} }).then(r => r.data),
   add: (content_en: string, content_pt: string, kind: string): Promise<Favorite> => api.post('/favorites', { content_en, content_pt, kind }).then(r => r.data),
+  bulk: (items: { content_en: string; content_pt: string; kind: string }[]): Promise<{ added: number; skipped: number; items: Favorite[] }> => api.post('/favorites/bulk', { items }).then(r => r.data),
   remove: (id: string) => api.delete(`/favorites/${id}`).then(r => r.data),
   removeByContent: (content_en: string) => api.delete('/favorites/by-content', { params: { content_en } }).then(r => r.data),
 }

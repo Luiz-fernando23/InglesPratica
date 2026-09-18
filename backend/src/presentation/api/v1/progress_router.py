@@ -5,6 +5,8 @@ from presentation.schemas.progress_schemas import (
     FavoriteRequest,
     FavoriteResponse,
     FavoritesListResponse,
+    BulkFavoriteRequest,
+    BulkFavoriteResponse,
     StatsResponse,
     DailyResponse,
 )
@@ -48,6 +50,24 @@ async def list_favorites(
     svc = FavoritesService(db)
     items, total = await svc.list(user, kind, limit)
     return FavoritesListResponse(total=total, items=[_to_fav(f) for f in items])
+
+
+@fav_router.post("/bulk", response_model=BulkFavoriteResponse, status_code=201)
+async def bulk_add_favorites(
+    body: BulkFavoriteRequest,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    svc = FavoritesService(db)
+    added: list = []
+    skipped = 0
+    for it in body.items:
+        try:
+            fav = await svc.add(user, it.content_en, it.content_pt, it.kind)
+            added.append(_to_fav(fav))
+        except Exception:
+            skipped += 1
+    return BulkFavoriteResponse(added=len(added), skipped=skipped, items=added)
 
 
 @fav_router.delete("/by-content", status_code=204)
